@@ -1,0 +1,151 @@
+.calendar {
+	font-size:12px;
+	text-align: center;
+	overflow: auto;
+	-moz-border-radius:6px;
+	-webkit-border-radius:6px;
+	border-radius:6px;
+	padding:0;
+	margin: auto;
+	color: black;	
+	cursor:default;
+	min-height: 203px;
+}
+	.cal_entete {
+		font-size:11px;
+		margin:5px 2px;
+		width: auto;
+		height: 20px;
+		text-align: center;
+		background: url(../images/blanc.png) repeat;
+	}
+	
+		.select_date {
+			list-style: none;
+			width: auto;
+		}
+		
+		li.list { float: left; padding: 0px 2px;cursor:pointer;}
+			.cal_now, .cal_prev, .cal_next {color: black;}
+
+			li.list:hover ul.select {
+				display: block;
+				position: absolute;
+				color: black;
+				padding-bottom: 5px;
+				padding-top: 5px;
+				text-align: left;
+				-moz-border-radius: 4px;
+				-webkit-border-radius: 4px;
+				border-radius: 4px;
+			}
+			
+			ul.select {
+				display: none;
+				list-style: none;
+			}
+			
+			.select {
+				margin: 0px;
+				padding: 0px;
+				padding-left: 2px;
+			}
+			
+			.select a {
+				color: black;
+			}
+			
+			.select a:hover {
+				color: black;
+				text-decoration: none;
+			}
+			
+			.select li {
+				padding-left: 5px;
+				padding-right: 5px;
+			}
+			
+			.select li:hover {
+				background: url(../images/blanc.png) repeat;
+			}
+			
+			.select_item {
+				list-style: none;
+				
+			}
+		li.aujourdhui{margin-left:10px;}
+			li.aujourdhui a, li.aujourdhui a:visited{display:inline-block;padding:0 2px;color:white !important;}
+			
+
+
+	table.cal_contenu {width: 100%;vertical-align:middle;}
+	
+		.day, .day_name {
+			height: 28px;
+			width:14.2857%;
+			background: rgb(255, 255, 255);
+			background: rgba(255, 255, 255, 0.8);}
+		
+		.day_name {
+			font-weight:bold;
+			font-size:90%;
+		}
+		
+			.today {
+				background:rgb(198, 73, 60);
+				background:rgb(198, 73, 60, 1);
+				color: white;
+				}
+
+			.evday {
+				background:rgb(89, 118, 198);
+				background:rgb(89, 118, 198, 1);
+				color: white;
+				}
+			.evday:hover {
+				background:rgb(60, 85, 155);
+				background:rgb(60, 85, 155, 1);
+				cursor:pointer;
+				}
+				
+				.events {
+					max-width: 224px;
+					display: none;
+					color: black;
+					cursor:default;
+				}
+				
+				.day:hover .events {
+					display: block;
+					position: absolute;
+					color: white;
+					margin-left: 10px;
+					padding:10px;
+					background: #ffffff repeat url(../images/blanc.png);
+					-moz-border-radius: 4px;
+					-webkit-border-radius: 4px;
+					border-radius: 4px;
+					border: 1px solid #A3C437;
+					
+				}
+		
+					.events p {
+						float: none;
+						color:#333333;
+					}
+					
+					.event_title  {
+						text-align: left;
+						font-weight: bold;
+						font-size:90%;
+						margin-bottom:2px;
+					}
+					
+					.event_info {
+						text-align: left;
+						color: black;
+						float: left;
+						font-size:11px;
+						font-style:italic;
+						margin-top:-4px;
+					}
