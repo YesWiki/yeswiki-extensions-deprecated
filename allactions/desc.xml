@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<plugin name="wkallactions" version="0.1" active="1">
+  <author>Florian</author>
+  <label>All actions</label>
+  <desc>Liste toutes les actions</desc>
+</plugin>
