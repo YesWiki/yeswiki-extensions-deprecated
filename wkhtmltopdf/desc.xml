@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin name="wkhtmltopdf" version="0.1" active="1">
+  <author>Florian Schmitt</author>
+  <label>Pages wiki en PDF</label>
+  <desc>Transformation de pages wiki en pdf grace au logiciel wkhtmltopdf.</desc>
+</plugin>
