@@ -13,7 +13,8 @@
 
 
 $params['url'] = urldecode($_GET["url"]);
-$params['color'] = urldecode($_GET["color"]);
+$params['colora'] = urldecode($_GET["colora"]);
+$params['colorb'] = urldecode($_GET["colorb"]);
 $params['class'] = urldecode($_GET["class"]);
 $params['link'] = urldecode($_GET["link"]);
 include_once '../libs/ical.php';

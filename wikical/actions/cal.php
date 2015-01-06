@@ -16,7 +16,8 @@ $GLOBALS['js'] = (isset($GLOBALS['js'])
 //on appele le fichier sans passer par wikini (pour l'appel ajax)
 
 $params['url'] = $this->GetParameter("url");
-$params['color'] = $this->GetParameter("color");
+$params['colora'] = $this->GetParameter("colora");
+$params['colorb'] = $this->GetParameter("colorb");
 $params['class'] = $this->GetParameter("class");
 $params['link'] = $this->GetParameter("link");
 include_once 'tools/wikical/libs/ical.php';
