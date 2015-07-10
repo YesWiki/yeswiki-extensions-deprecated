@@ -1,5 +1,5 @@
 # Extension YesWiki ferme
-## Ajoute un champs pour créer automatiquement un wiki associé à une fiche bazar
+### Ajoute un champs pour créer automatiquement un wiki associé à une fiche bazar
 
 1. copier l'extension dans votre dossier tools
 
@@ -20,7 +20,6 @@
   'yeswiki-farm-homepage' => 'DashBoard', // page d'accueil (facultatif)
   'yeswiki-farm-create-user' => false, // cas spécifique ou l'on veut créer un user sur le wiki source (facultatif)
 ```
-
 3. utiliser les lignes suivantes pour le formulaire bazar "ferme":
 ```
 texte***bf_titre***Titre***255***255*** *** *** ***1***
