@@ -21,66 +21,86 @@
 // | along with Foobar; if not, write to the Free Software                                                |
 // | Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA                            |
 // +------------------------------------------------------------------------------------------------------+
-// CVS : $Id: wiki.php,v 1.16 2011-07-13 10:33:23 mrflos Exp $
+
 /**
 * wiki.php
 *
 * Description : fichier de configuration de la ferme
 *
-*@package wkfarm
-*@author        Florestan BREDOW <florestan.bredow@supagro.inra.fr>
-*@copyright     yeswiki.net 2012
-*@version       $Revision: 1.16 $ $Date: 2011-07-13 10:33:23 $
+*@package 			wkfarm
+*@author        Florian Schmitt <mrflos@gmail.com>
+*@copyright     yeswiki.net 2015
 *
 */
 
-if (!defined("WIKINI_VERSION"))
-{
+if (!defined("WIKINI_VERSION")) {
         die ("acc&egrave;s direct interdit");
 }
 
-// on prend le dossier du wiki comme chemin pour la ferme
-define ('FERME_PATH', getcwd().DIRECTORY_SEPARATOR);
+include_once 'tools/ferme/libs/ferme.functions.php';
 
-// Necessite chemin absolu
-define ('FERME_SOURCE_PATH', realpath(FERME_PATH));
+// test de l'existence des variables de configuration de la ferme, mise en place de valeurs par défaut sinon
+if (!isset($wakkaConfig['yeswiki-farm-root-url'])) {
+    $wakkaConfig['yeswiki-farm-root-url'] = str_replace(
+        'wakka.php?wiki=',
+        '',
+        $wakkaConfig['base_url']
+    );
+    $wakkaConfig['yeswiki-farm-root-folder'] = '.';
+} elseif (!isset($wakkaConfig['yeswiki-farm-root-folder'])) {
+    die('Il faut indiquer le chemin relatif des wikis avec la valeur "yeswiki-farm-root-folder"
+     dans le fichier de configuration.');
+}
+// themes supplémentaires
+if (!isset($wakkaConfig['yeswiki-farm-extra-themes'])
+    || !is_array($wakkaConfig['yeswiki-farm-extra-themes'])) {
+    $wakkaConfig['yeswiki-farm-extra-themes'] = array();
+}
 
-// on prend l'url du wiki, moins le wakka.php et consorts comme url de base
-$url = explode('wakka.php', $wakkaConfig['base_url']);
-define ('FERME_BASE_URL', $url[0]);
+// extensions supplémentaires
+if (!isset($wakkaConfig['yeswiki-farm-extra-tools'])
+    || !is_array($wakkaConfig['yeswiki-farm-extra-tools'])) {
+    $wakkaConfig['yeswiki-farm-extra-tools'] = array();
+}
 
-// template d'affichage de l'interface d'ajout de wikis
-define ('FERME_TEMPLATE', "yeswiki.phtml");
+// theme par defaut
+if (!isset($wakkaConfig['yeswiki-farm-fav-theme'])) {
+    $wakkaConfig['yeswiki-farm-fav-theme'] = 'bootstrap';
+}
+if (!isset($wakkaConfig['yeswiki-farm-fav-squelette'])) {
+    $wakkaConfig['yeswiki-farm-fav-squelette'] = '1col.tpl.html';
+}
+if (!isset($wakkaConfig['yeswiki-farm-fav-style'])) {
+    $wakkaConfig['yeswiki-farm-fav-style'] = 'bootstrap.css';
+}
+if (!isset($wakkaConfig['yeswiki-farm-bg-img'])) {
+    $wakkaConfig['yeswiki-farm-bg-img'] = '';
+}
 
-//base de données
-define ('FERME_DB_HOST', $wakkaConfig['mysql_host']);
-define ('FERME_DB_NAME', $wakkaConfig['mysql_database']);
-define ('FERME_DB_USER', $wakkaConfig['mysql_user']);
-define ('FERME_DB_PASSWORD', $wakkaConfig['mysql_password']);
+// acls
+if (!isset($wakkaConfig['yeswiki-farm-write-acls'])) {
+    $wakkaConfig['yeswiki-farm-write-acls'] = '*';
+}
+if (!isset($wakkaConfig['yeswiki-farm-read-acls'])) {
+    $wakkaConfig['yeswiki-farm-read-acls'] = '*';
+}
+if (!isset($wakkaConfig['yeswiki-farm-comments-acls'])) {
+    $wakkaConfig['yeswiki-farm-comments-acls'] = '+';
+}
 
+// sql d'installation par défaut
+if (!isset($wakkaConfig['yeswiki-farm-sql'])
+    || (isset($wakkaConfig['yeswiki-farm-sql']) && !file_exists('tools/ferme/sql/'.$wakkaConfig['yeswiki-farm-sql']))) {
+    die('Dans wakka.config.php, il faut indiquer la valeur "yeswiki-farm-sql" pour le fichier sql '
+         .'d\'installation du wiki et le mettre dans le dossier tools/ferme/sql .');
+}
 
+// création d'un utilisateur dans le wiki initial (sert pour des cas spécifiques avec une bd centralisée)
+if (!isset($wakkaConfig['yeswiki-farm-create-user'])) {
+    $wakkaConfig['yeswiki-farm-create-user'] = false;
+}
 
-// scanne les themes
-$GLOBALS['themesyeswiki'] = array(
-	'SupAgro' => array(
-		'theme' => 'yeswiki',
-		'style' => 'yeswiki-green.css',
-		'squelette' => 'yeswiki.tpl.html',
-		'thumb' => 'img/YesWiki1.png',
-	),
-	'SupAgro + menu gauche' => array(
-		'theme' => 'yeswiki',
-		'style' => 'yeswiki-green.css',
-		'squelette' => 'yeswiki-2cols-left.tpl.html',
-		'thumb' => 'img/YesWiki2.png',
-	),
-	'YesWiki' => array(
-		'theme' => 'yeswiki',
-		'style' => 'yeswiki.css',
-		'squelette' => 'yeswiki.tpl.html',
-		'thumb' => 'img/YesWiki3.png',
-	),
-
-		);
-
-?>
+// page d'accueil des wikis de la ferme
+if (!isset($wakkaConfig['yeswiki-farm-homepage'])) {
+    $wakkaConfig['yeswiki-farm-homepage'] = $wakkaConfig['root_page'];
+}
