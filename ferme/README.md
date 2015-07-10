@@ -1,5 +1,5 @@
-# Extension YesWiki ferme
-### Ajoute un champs pour créer automatiquement un wiki associé à une fiche bazar
+# Extension YesWiki bazar ferme
+### Ajoute un champs 'yeswiki' pour créer automatiquement un wiki dans une fiche bazar
 
 1) copier l'extension dans votre dossier tools
 
@@ -24,7 +24,6 @@
 ```
 texte***bf_titre***Titre***255***255*** *** *** ***1***
 texte***bf_description***Description courte***255***255*** *** *** ***1***
-image***bf_logo***Logo (250x180 pixels)***180***250***180***250***right***1*** ***
 image***bf_bandeau***Bandeau (1920x280 pixels)***400***1920***400***1920***center***1*** ***
 yeswiki***bf_dossier-wiki***Nom du dossier wiki***255***255*** *** *** ***1***
 ```
