@@ -57,7 +57,7 @@ function collaborative_doc(&$formtemplate, $tableau_template, $mode, $valeurs_fi
             }
         }
         $select_html.= "</select>\n</div>\n</div>\n";
-        if (isset($valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url']) &&
+        if (isset($valeurs_fiche[$tableau_template[1]]) && isset($valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url']) &&
                 $valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'] != '') {
             $select_html.= '<input type="hidden" value="'.
                 $valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'].'" name="'.
