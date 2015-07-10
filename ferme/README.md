@@ -1,9 +1,9 @@
 # Extension YesWiki ferme
 ### Ajoute un champs pour créer automatiquement un wiki associé à une fiche bazar
 
-1. copier l'extension dans votre dossier tools
+1) copier l'extension dans votre dossier tools
 
-2. ajouter les informations suivantes à wakka.config.php
+2) ajouter les informations suivantes à wakka.config.php
 ```
   'yeswiki-farm-sql' => 'paepard-espace-de-travail.sql', //fichier sql source des wikis de la ferme présent dans tools/ferme/sql (obligatoire)
   'yeswiki-farm-root-url' => 'http://yeswiki.dev/', //adresse url de départ des wikis de la ferme, le nom du dossier sera ajouté (facultatif)
@@ -20,7 +20,7 @@
   'yeswiki-farm-homepage' => 'DashBoard', // page d'accueil (facultatif)
   'yeswiki-farm-create-user' => false, // cas spécifique ou l'on veut créer un user sur le wiki source (facultatif)
 ```
-3. utiliser les lignes suivantes pour le formulaire bazar "ferme":
+3) utiliser les lignes suivantes pour le formulaire bazar "ferme":
 ```
 texte***bf_titre***Titre***255***255*** *** *** ***1***
 texte***bf_description***Description courte***255***255*** *** *** ***1***
