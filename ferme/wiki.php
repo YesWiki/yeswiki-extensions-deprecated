@@ -89,10 +89,12 @@ if (!isset($wakkaConfig['yeswiki-farm-comments-acls'])) {
 }
 
 // sql d'installation par défaut
-if (!isset($wakkaConfig['yeswiki-farm-sql'])
-    || (isset($wakkaConfig['yeswiki-farm-sql']) && !file_exists('tools/ferme/sql/'.$wakkaConfig['yeswiki-farm-sql']))) {
+if (isset($wakkaConfig['yeswiki-farm-sql']) && !file_exists('tools/ferme/sql/'.$wakkaConfig['yeswiki-farm-sql']))) {
     die('Dans wakka.config.php, il faut indiquer la valeur "yeswiki-farm-sql" pour le fichier sql '
          .'d\'installation du wiki et le mettre dans le dossier tools/ferme/sql .');
+}
+if (!isset($wakkaConfig['yeswiki-farm-sql']) {
+    $wakkaConfig['yeswiki-farm-sql'] = 'default';
 }
 
 // création d'un utilisateur dans le wiki initial (sert pour des cas spécifiques avec une bd centralisée)
