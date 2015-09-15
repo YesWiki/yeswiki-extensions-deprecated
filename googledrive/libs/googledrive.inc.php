@@ -72,7 +72,7 @@ function collaborative_doc(&$formtemplate, $tableau_template, $mode, $valeurs_fi
             if ($valeurs_fiche[$tableau_template[1]] == 'etherpad') {
                 return array(
                     $tableau_template[1] => $valeurs_fiche[$tableau_template[1]],
-                    $tableau_template[1].$valeurs_fiche[$tableau_template[1]].'_url' => 'http://pad.coop-tic.eu/p/paepard'.
+                    $tableau_template[1].$valeurs_fiche[$tableau_template[1]].'_url' => $GLOBALS['wiki']->config['etherpad_url'].
                     genere_nom_wiki($valeurs_fiche['bf_titre'])
                 );
             } else {
@@ -111,8 +111,8 @@ function collaborative_doc(&$formtemplate, $tableau_template, $mode, $valeurs_fi
                 
                 // dossier de destination
                 $parent = new Google_Service_Drive_ParentReference();
-                $parent->setId('0B5DlmlXvTr8FQjVla2xRUkJuXzg');
-                // cet id correspond à un dossier partage de paepard@gmail.com
+                $parent->setId($GLOBALS['wiki']->config['folder_id']);
+                // cet id correspond à un dossier partage du drive
                 // (avec le $GLOBALS['wiki']->config['service_account_name'] en partage)
                 $file->setParents(array($parent));
                 

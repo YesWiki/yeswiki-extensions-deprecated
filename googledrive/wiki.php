@@ -10,6 +10,7 @@ require_once 'tools/googledrive/libs/vendor/Google/Service/Drive.php';
 
 //fonctions pour bazar
 require_once 'tools/googledrive/libs/googledrive.inc.php';
+
 // prend les valeurs dans wakka.config.php si renseignées, ou les valeurs ci dessous le cas échéant
 $wakkaConfig['service_account_name'] = isset($wakkaConfig['service_account_name']) ?
   $wakkaConfig['service_account_name'] : "XXXXXXX@developer.gserviceaccount.com";
