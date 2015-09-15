@@ -27,14 +27,14 @@
 *
 * Description : fichier de configuration de la ferme
 *
-*@package 			wkfarm
+*@package       wkfarm
 *@author        Florian Schmitt <mrflos@gmail.com>
 *@copyright     yeswiki.net 2015
 *
 */
 
 if (!defined("WIKINI_VERSION")) {
-        die ("acc&egrave;s direct interdit");
+        die("acc&egrave;s direct interdit");
 }
 
 include_once 'tools/ferme/libs/ferme.functions.php';
@@ -101,6 +101,22 @@ if (!isset($wakkaConfig['yeswiki-farm-sql'])) {
 if (!isset($wakkaConfig['yeswiki-farm-create-user'])) {
     $wakkaConfig['yeswiki-farm-create-user'] = false;
 }
+
+// Utilisateur WikiAdmin par défaut (laisser vide pour demander à la création du wiki)
+if (!isset($wakkaConfig['yeswiki-farm-default-WikiAdmin'])) {
+    $wakkaConfig['yeswiki-farm-default-WikiAdmin'] = 'WikiAdmin';
+}
+
+// Mot de passe WikiAdmin par défaut (laisser vide pour demander à la création du wiki)
+if (!isset($wakkaConfig['yeswiki-farm-password-WikiAdmin'])) {
+    $wakkaConfig['yeswiki-farm-password-WikiAdmin'] = '';
+}
+
+// Email par défaut (laisser vide pour demander à la création du wiki)
+if (!isset($wakkaConfig['yeswiki-farm-email-WikiAdmin'])) {
+    $wakkaConfig['yeswiki-farm-email-WikiAdmin'] = '';
+}
+
 
 // page d'accueil des wikis de la ferme
 if (!isset($wakkaConfig['yeswiki-farm-homepage'])) {

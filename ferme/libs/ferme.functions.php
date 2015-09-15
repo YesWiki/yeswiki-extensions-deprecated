@@ -57,16 +57,37 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
             $def = $valeurs_fiche[$tableau_template[1]];
             $disable = ' disabled';
             $html .= '<input type="hidden" name="'.$tableau_template[1].'_exists" value="1">';
+            $html .= '<input type="hidden" name="'.$tableau_template[1].'" value="'.$def.'">';
         } else {
             $def = '';
             $disable = '';
-            $extrafields = '<br>
-            <input type="text" class="form-control" id="'. $tableau_template[1].'_wikiname' . '" name="'
-            . $tableau_template[1].'_wikiname'.'" required placeholder="NomWiki de l\'admin"><br>
-            <input type="password" class="form-control" id="'. $tableau_template[1].'_password' . '" name="'
-            . $tableau_template[1].'_password'.'" required placeholder="Mot de passe de l\'admin"><br>
-            <input type="email" class="form-control" id="'. $tableau_template[1].'_email' . '" name="'
-            . $tableau_template[1].'_email'.'" required placeholder="Email de l\'admin">';
+            $extrafields = '<br>';
+            if (empty($GLOBALS['wiki']->config['yeswiki-farm-default-WikiAdmin'])) {
+                $extrafields .= '<input type="text" class="form-control" id="'.$tableau_template[1].'_wikiname'
+                    .'" name="'.$tableau_template[1].'_wikiname'.'" required placeholder="NomWiki de l\'admin"><br>';
+            } else {
+                $extrafields .= '<input type="hidden" class="form-control" '
+                    .'name="'.$tableau_template[1].'_wikiname'.'" value="'
+                    .htmlspecialchars($GLOBALS['wiki']->config['yeswiki-farm-default-WikiAdmin']).'">';
+            }
+            if (empty($GLOBALS['wiki']->config['yeswiki-farm-password-WikiAdmin'])) {
+                $extrafields .= '<input type="password" class="form-control" id="'.$tableau_template[1].'_password"'
+                    .' name="'.$tableau_template[1].'_password'.'" required '
+                    .'placeholder="Mot de passe de l\'admin"><br>';
+            } else {
+                $extrafields .= '<input type="hidden" class="form-control" '
+                    .'name="'.$tableau_template[1].'_password'.'" value="'
+                    .htmlspecialchars($GLOBALS['wiki']->config['yeswiki-farm-password-WikiAdmin']).'">';
+            }
+            if (empty($GLOBALS['wiki']->config['yeswiki-farm-email-WikiAdmin'])) {
+                $extrafields .= '
+                <input type="email" class="form-control" id="'. $tableau_template[1].'_email' . '" name="'
+                . $tableau_template[1].'_email'.'" required placeholder="Email de l\'admin">';
+            } else {
+                $extrafields .= '<input type="hidden" class="form-control" '
+                    .'name="'.$tableau_template[1].'_email'.'" value="'
+                    .htmlspecialchars($GLOBALS['wiki']->config['yeswiki-farm-email-WikiAdmin']).'">';
+            }
         }
         
         $html .= $tableau_template[2] . $bulledaide . ' : </div>'."\n"
@@ -74,8 +95,8 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
             .'<div class="input-prepend input-group">'."\n"
             .'<span class="add-on input-group-addon">'.$GLOBALS['wiki']->config['yeswiki-farm-root-url'].'</span>'."\n"
             .'<input type="text" class="form-control" id="'. $tableau_template[1] . '" name="' . $tableau_template[1]
-            .'" required'.$disable.' value="'.$def.'" pattern="^[0-9a-zA-Z-]*$" placeholder="dossier">'."\n"
-            .$extrafields.'</div>'."\n".'</div>'."\n".'</div>'."\n";
+            .'" required'.$disable.' value="'.$def.'" pattern="^[0-9a-zA-Z-]*$" placeholder="dossier">'.'</div>'."\n"
+            .$extrafields.'</div>'."\n".'</div>'."\n";
         $formtemplate->addElement('html', $html);
     } elseif ($mode == 'requete') {
         //si le doc n'existe pas, on le crée
@@ -85,6 +106,27 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                 && $valeurs_fiche[$tableau_template[1].'_exists'] == 1) {
                 // si le wiki a déja été créé on zappe
             } else {
+                if ($valeurs_fiche[$tableau_template[1].'_wikiname'] == '{{folder}}') {
+                    $valeurs_fiche[$tableau_template[1].'_wikiname'] = genere_nom_wiki($valeurs_fiche[$tableau_template[1]], 0);
+                    if ($GLOBALS['wiki']->LoadUser($valeurs_fiche[$tableau_template[1].'_wikiname'])) {
+                        die('L\'utilisateur '.$valeurs_fiche[$tableau_template[1].'_wikiname'].' existe déjà, veuillez trouver un autre nom pour votre wiki.');
+                    }
+                }
+
+                // creation d'un user?
+                if ($GLOBALS['wiki']->config['yeswiki-farm-create-user']) {
+                    if ($GLOBALS['wiki']->LoadUser($valeurs_fiche[$tableau_template[1].'_wikiname'])) {
+                        die('L\'utilisateur '.$valeurs_fiche[$tableau_template[1].'_wikiname'].' existe déjà, veuillez trouver un autre nom pour votre wiki.');
+                    }
+                    $GLOBALS['wiki']->Query(
+                        "insert into ".$GLOBALS['wiki']->config["table_prefix"]."users set ".
+                        "signuptime = now(), ".
+                        "name = '".mysql_escape_string($valeurs_fiche[$tableau_template[1].'_wikiname'])."', ".
+                        "email = '".mysql_escape_string($valeurs_fiche[$tableau_template[1].'_email'])."', ".
+                        "password = md5('".mysql_escape_string($valeurs_fiche[$tableau_template[1].'_password'])."')"
+                    );
+                }
+
                 $url = $GLOBALS['wiki']->config['yeswiki-farm-root-url'].$valeurs_fiche[$tableau_template[1]];
                 $srcfolder = getcwd().DIRECTORY_SEPARATOR;
                 $destfolder = getcwd().DIRECTORY_SEPARATOR.$GLOBALS['wiki']->config['yeswiki-farm-root-folder']
@@ -226,17 +268,6 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                             copyRecursive(
                                 $srcfolder.'tools'.DIRECTORY_SEPARATOR.$tools,
                                 $destfolder.'tools'.DIRECTORY_SEPARATOR.$tools
-                            );
-                        }
-
-                        // creation d'un user?
-                        if ($GLOBALS['wiki']->config['yeswiki-farm-create-user']) {
-                            $GLOBALS['wiki']->Query(
-                                "insert into ".$GLOBALS['wiki']->config["table_prefix"]."users set ".
-                                "signuptime = now(), ".
-                                "name = '".mysql_escape_string($valeurs_fiche[$tableau_template[1].'_wikiname'])."', ".
-                                "email = '".mysql_escape_string($valeurs_fiche[$tableau_template[1].'_email'])."', ".
-                                "password = md5('".mysql_escape_string($valeurs_fiche[$tableau_template[1].'_password'])."')"
                             );
                         }
 
