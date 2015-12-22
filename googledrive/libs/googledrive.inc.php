@@ -30,7 +30,7 @@ function collaborative_doc(&$formtemplate, $tableau_template, $mode, $valeurs_fi
         $select_html.= $tableau_template[2] . $bulledaide . ' : </div>' . "\n" .
             '<div class="controls col-xs-8">' . "\n" . '<select';
         
-        $select_attributes = ' class="form-control" id="' . $tableau_template[1] . '" name="' . $tableau_template[1] . '"';
+        $select_attributes = ' class="form-control" id="'.$tableau_template[1].'" name="'.$tableau_template[1].'"';
         
         if (isset($tableau_template[8]) && $tableau_template[8] == 1) {
             $select_attributes.= ' required="required"';
@@ -44,7 +44,7 @@ function collaborative_doc(&$formtemplate, $tableau_template, $mode, $valeurs_fi
         }
         
         if ($def == '' && ($tableau_template[4] == '' || $tableau_template[4] <= 1) || $def == 0) {
-            $select_html.= '<option value="" selected="selected">' . _t('BAZ_CHOISIR') . '</option>' . "\n";
+            $select_html.= '<option value="" selected="selected">Aucun</option>' . "\n";
         }
         
         if (is_array($valliste)) {
@@ -57,8 +57,9 @@ function collaborative_doc(&$formtemplate, $tableau_template, $mode, $valeurs_fi
             }
         }
         $select_html.= "</select>\n</div>\n</div>\n";
-        if (isset($valeurs_fiche[$tableau_template[1]]) && isset($valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url']) &&
-                $valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'] != '') {
+        if (isset($valeurs_fiche[$tableau_template[1]])
+            && isset($valeurs_fiche[$tableau_template[1].$valeurs_fiche[$tableau_template[1]] . '_url'])
+            && $valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'] != '') {
             $select_html.= '<input type="hidden" value="'.
                 $valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'].'" name="'.
                 $tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'.'">'."\n";
@@ -72,10 +73,12 @@ function collaborative_doc(&$formtemplate, $tableau_template, $mode, $valeurs_fi
             if ($valeurs_fiche[$tableau_template[1]] == 'etherpad') {
                 return array(
                     $tableau_template[1] => $valeurs_fiche[$tableau_template[1]],
-                    $tableau_template[1].$valeurs_fiche[$tableau_template[1]].'_url' => $GLOBALS['wiki']->config['etherpad_url'].
-                    genere_nom_wiki($valeurs_fiche['bf_titre'])
+                    $tableau_template[1].$valeurs_fiche[$tableau_template[1]].'_url'
+                        => $GLOBALS['wiki']->config['etherpad_url']
+                            .genere_nom_wiki($valeurs_fiche['bf_titre'])
                 );
-            } else {
+            } elseif ($valeurs_fiche[$tableau_template[1]] == 'spreadsheet'
+                or $valeurs_fiche[$tableau_template[1]] == 'wordprocessing') {
                 $client = new Google_Client();
                 $client->setApplicationName("Paepard collaborative docs");
                 $service = new Google_Service_Drive($client);
@@ -134,7 +137,8 @@ function collaborative_doc(&$formtemplate, $tableau_template, $mode, $valeurs_fi
         } else {
             return array(
                 $tableau_template[1] => $valeurs_fiche[$tableau_template[1]],
-                $tableau_template[1].$valeurs_fiche[$tableau_template[1]].'_url' => $valeurs_fiche[$tableau_template[1].'_url']
+                $tableau_template[1].$valeurs_fiche[$tableau_template[1]].'_url'
+                    => $valeurs_fiche[$tableau_template[1].'_url']
             );
         }
     } elseif ($mode == 'html') {
