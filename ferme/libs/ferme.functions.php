@@ -1,4 +1,161 @@
 <?php
+/** initFarmConfig() - test le fichier de configuration et ajoute des valuers par defaut, si besoin
+ *
+ * @return   void
+ */
+function initFarmConfig()
+{
+    // test de l'existence des variables de configuration de la ferme, mise en place de valeurs par défaut sinon
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-root-url'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-root-url'] = str_replace(
+            'wakka.php?wiki=',
+            '',
+            $GLOBALS['wiki']->config['base_url']
+        );
+        $GLOBALS['wiki']->config['yeswiki-farm-root-folder'] = '.';
+    } elseif (!isset($GLOBALS['wiki']->config['yeswiki-farm-root-folder'])) {
+        exit('<div class="alert alert-danger">Il faut indiquer le chemin relatif des wikis'
+            .' avec la valeur "yeswiki-farm-root-folder" dans le fichier de configuration.</div>');
+    }
+    // themes supplémentaires
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-extra-themes'])
+        || !is_array($GLOBALS['wiki']->config['yeswiki-farm-extra-themes'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-extra-themes'] = array();
+    }
+
+    // extensions supplémentaires
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-extra-tools'])
+        || !is_array($GLOBALS['wiki']->config['yeswiki-farm-extra-tools'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-extra-tools'] = array();
+    }
+
+    // theme par defaut
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-themes'])
+        or !is_array($GLOBALS['wiki']->config['yeswiki-farm-themes'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-themes'][0]['label'] = 'Yeswiki de base';
+        $GLOBALS['wiki']->config['yeswiki-farm-themes'][0]['screenshot'] = 'yeswiki.jpg';
+        $GLOBALS['wiki']->config['yeswiki-farm-themes'][0]['theme'] = 'yeswiki';
+        $GLOBALS['wiki']->config['yeswiki-farm-themes'][0]['squelette'] = 'responsive-1col.tpl.html';
+        $GLOBALS['wiki']->config['yeswiki-farm-themes'][0]['style'] = 'gray.css';
+    } else {
+        // verifier l'existence des themes
+        foreach ($GLOBALS['wiki']->config['yeswiki-farm-themes'] as $key => $theme) {
+            if (!isset($theme['label']) or empty($theme['label'])) {
+                exit('<div class="alert alert-danger">Au moins un label pour les themes de la ferme n\'a'
+                    .' pas été bien renseigné.</div>');
+            }
+            if (!isset($theme['screenshot']) or empty($theme['screenshot'])) {
+                exit('<div class="alert alert-danger">Au moins un screenshot pour les themes de la ferme n\'a'
+                    .' pas été bien renseigné.</div>');
+            } elseif (!is_file('tools/ferme/screenshots/'.$theme['screenshot'])) {
+                exit('<div class="alert alert-danger">Le fichier "tools/ferme/screenshots/'.$theme['screenshot']
+                    .'" n\'a pas été trouvé.</div>');
+            }
+            if (!isset($theme['theme']) or empty($theme['theme'])) {
+                exit('<div class="alert alert-danger">Au moins un theme pour les themes de la ferme n\'a'
+                    .' pas été bien renseigné.</div>');
+            } elseif (!is_dir('themes/'.$theme['theme'])) {
+                exit('<div class="alert alert-danger">Le dossier "themes/'.$theme['theme']
+                    .'" n\'a pas été trouvé.</div>');
+            }
+            if (!isset($theme['squelette']) or empty($theme['squelette'])) {
+                exit('<div class="alert alert-danger">Au moins un squelette pour les themes de la ferme n\'a'
+                    .' pas été bien renseigné.</div>');
+            } elseif (!is_file('themes/'.$theme['theme'].'/squelettes/'.$theme['squelette'])) {
+                exit('<div class="alert alert-danger">Le squelette "themes/'.$theme['theme']
+                    .'/squelettes/'.$theme['squelette'].'" n\'a pas été trouvé.</div>');
+            }
+            if (!isset($theme['style']) or empty($theme['style'])) {
+                exit('<div class="alert alert-danger">Au moins un style css pour les themes de la ferme n\'a'
+                    .' pas été bien renseigné.</div>');
+            } elseif (!is_file('themes/'.$theme['theme'].'/styles/'.$theme['style'])) {
+                exit('<div class="alert alert-danger">Le style css "themes/'.$theme['theme'].'/styles/'.$theme['style']
+                    .'" n\'a pas été trouvé.</div>');
+            }
+        }
+    }
+
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-bg-img'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-bg-img'] = '';
+    }
+
+    // acls
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-acls'])
+        or !is_array($GLOBALS['wiki']->config['yeswiki-farm-acls'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-acls'][0]['label'] = 'Wiki ouvert';
+        $GLOBALS['wiki']->config['yeswiki-farm-acls'][0]['read'] = '*';
+        $GLOBALS['wiki']->config['yeswiki-farm-acls'][0]['write'] = '*';
+        $GLOBALS['wiki']->config['yeswiki-farm-acls'][0]['comments'] = '+';
+    } else {
+        // verifier l'existence des acls
+        foreach ($GLOBALS['wiki']->config['yeswiki-farm-acls'] as $key => $acls) {
+            if (!isset($acls['label']) or empty($acls['label'])) {
+                exit('<div class="alert alert-danger">Au moins un label pour les acls de la ferme n\'a'
+                    .' pas été bien renseigné.</div>');
+            }
+            if (!isset($acls['read']) or empty($acls['read'])) {
+                exit('<div class="alert alert-danger">Au moins un droit en lecture (read) n\'a'
+                    .' pas été bien renseigné.</div>');
+            }
+            if (!isset($acls['write']) or empty($acls['write'])) {
+                exit('<div class="alert alert-danger">Au moins un droit en lecture (write) n\'a'
+                    .' pas été bien renseigné.</div>');
+            }
+            if (!isset($acls['comments']) or empty($acls['comments'])) {
+                exit('<div class="alert alert-danger">Au moins un droit des commentaires (comments) n\'a'
+                    .' pas été bien renseigné.</div>');
+            }
+        }
+    }
+
+    // sql d'installation par défaut
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-sql'])
+        or !is_array($GLOBALS['wiki']->config['yeswiki-farm-sql'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-sql'][0]['label'] = 'Configuration de base';
+        $GLOBALS['wiki']->config['yeswiki-farm-sql'][0]['file'] = 'default.sql';
+
+    } else {
+        // verifier l'existence des parametres des fichiers sql
+        foreach ($GLOBALS['wiki']->config['yeswiki-farm-sql'] as $key => $sql) {
+            if (!isset($sql['label']) or empty($sql['label'])) {
+                exit('<div class="alert alert-danger">Au moins un label pour les configurations sql de la ferme n\'a'
+                    .' pas été bien renseigné.</div>');
+            }
+            if (!isset($sql['file']) or empty($sql['file'])) {
+                exit('<div class="alert alert-danger">Au moins un fichier sql de configuration n\'a'
+                    .' pas été bien renseigné.</div>');
+            } elseif (!is_file('tools/ferme/sql/'.$sql['file'])) {
+                exit('<div class="alert alert-danger">Le fichier sql "tools/ferme/sql/'.$sql['file']
+                    .'" n\'a pas été trouvé.</div>');
+            }
+        }
+    }
+
+    // création d'un utilisateur dans le wiki initial (sert pour des cas spécifiques avec une bd centralisée)
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-create-user'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-create-user'] = false;
+    }
+
+    // Utilisateur WikiAdmin par défaut (laisser vide pour demander à la création du wiki)
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-default-WikiAdmin'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-default-WikiAdmin'] = 'WikiAdmin';
+    }
+
+    // Mot de passe WikiAdmin par défaut (laisser vide pour demander à la création du wiki)
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-password-WikiAdmin'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-password-WikiAdmin'] = '';
+    }
+
+    // Email par défaut (laisser vide pour demander à la création du wiki)
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-email-WikiAdmin'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-email-WikiAdmin'] = '';
+    }
+
+    // page d'accueil des wikis de la ferme
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-homepage'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-homepage'] = $GLOBALS['wiki']->config['root_page'];
+    }
+}
 
 function copyRecursive($path, $dest)
 {
@@ -36,8 +193,12 @@ function copyRecursive($path, $dest)
  */
 function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 {
+    initFarmConfig();
     if ($mode == 'saisie') {
         $bulledaide = '';
+        // echo "<pre>";
+        // var_dump($GLOBALS['wiki']->config["yeswiki-farm-sql"]);
+        // echo "</pre>";
         if (isset($tableau_template[10]) && $tableau_template[10] != '') {
             $bulledaide = ' &nbsp;&nbsp;<img class="tooltip_aide" title="' .
             htmlentities($tableau_template[10], ENT_QUOTES, TEMPLATES_DEFAULT_CHARSET) .
@@ -47,12 +208,12 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                 ._t('uniquement des caractères alphanumériques et tirets (-)')
                 .'" src="tools/bazar/presentation/images/aide.png" width="16" height="16" alt="image aide" />';
         }
-        
-        $html = '<div class="control-group form-group">' . "\n" . '<div class="control-label col-xs-3">' . "\n";
+
+        $html = '<div class="control-group form-group">' . "\n" . '<label class="control-label col-xs-3">' . "\n";
         if (isset($tableau_template[8]) && $tableau_template[8] == 1) {
             $html.= '<span class="symbole_obligatoire">*&nbsp;</span>' . "\n";
         }
-        
+
         if (isset($valeurs_fiche[$tableau_template[1]]) && $valeurs_fiche[$tableau_template[1]] != '') {
             $def = $valeurs_fiche[$tableau_template[1]];
             $disable = ' disabled';
@@ -70,6 +231,15 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                     .'name="'.$tableau_template[1].'_wikiname'.'" value="'
                     .htmlspecialchars($GLOBALS['wiki']->config['yeswiki-farm-default-WikiAdmin']).'">';
             }
+            if (empty($GLOBALS['wiki']->config['yeswiki-farm-email-WikiAdmin'])) {
+                $extrafields .= '
+                <input type="email" class="form-control" id="'. $tableau_template[1].'_email' . '" name="'
+                . $tableau_template[1].'_email'.'" required placeholder="Email de l\'admin">';
+            } else {
+                $extrafields .= '<input type="hidden" class="form-control" '
+                    .'name="'.$tableau_template[1].'_email'.'" value="'
+                    .htmlspecialchars($GLOBALS['wiki']->config['yeswiki-farm-email-WikiAdmin']).'"><br>';
+            }
             if (empty($GLOBALS['wiki']->config['yeswiki-farm-password-WikiAdmin'])) {
                 $extrafields .= '<input type="password" class="form-control" id="'.$tableau_template[1].'_password"'
                     .' name="'.$tableau_template[1].'_password'.'" required '
@@ -79,18 +249,43 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                     .'name="'.$tableau_template[1].'_password'.'" value="'
                     .htmlspecialchars($GLOBALS['wiki']->config['yeswiki-farm-password-WikiAdmin']).'">';
             }
-            if (empty($GLOBALS['wiki']->config['yeswiki-farm-email-WikiAdmin'])) {
-                $extrafields .= '
-                <input type="email" class="form-control" id="'. $tableau_template[1].'_email' . '" name="'
-                . $tableau_template[1].'_email'.'" required placeholder="Email de l\'admin">';
+            if (count($GLOBALS['wiki']->config["yeswiki-farm-themes"])>1) {
+                $themepreview = '<div id="yeswiki-farm-theme-imgs" style="width:400px;">';
+                $extrafields .= '<h5>Thème graphique</h5>'.'<select id="yeswiki-farm-theme" name="yeswiki-farm-theme">';
+                $first = true;
+                foreach ($GLOBALS['wiki']->config["yeswiki-farm-themes"] as $key => $theme) {
+                    $extrafields .= '<option value="'.$key.'">'.$theme["label"].'</option>'."\n";
+                    if ($first) {
+                        $first = false;
+                        $hidden = '';
+                    } else {
+                        $hidden = ' hide';
+                    }
+                    $themepreview .= '<img class="img-responsive'.$hidden.'" src="tools/ferme/screenshots/'.$theme["screenshot"].'">'."\n";
+                }
+                $extrafields .= '</select>'.$themepreview.'</div>'."\n";
+                $js = "$('#yeswiki-farm-theme').on('change', function() {
+                  $('#yeswiki-farm-theme-imgs img').addClass('hide');
+                  console.log($('#yeswiki-farm-theme-imgs img:eq('+parseInt($(this).val())+')'));
+                  $('#yeswiki-farm-theme-imgs img:eq('+parseInt($(this).val())+')').removeClass('hide');
+                });";
+                $GLOBALS['wiki']->addJavascript($js);
             } else {
-                $extrafields .= '<input type="hidden" class="form-control" '
-                    .'name="'.$tableau_template[1].'_email'.'" value="'
-                    .htmlspecialchars($GLOBALS['wiki']->config['yeswiki-farm-email-WikiAdmin']).'">';
+                $extrafields .= '<input type="hidden" name="yeswiki-farm-theme" value="0">'."\n";
+            }
+
+            if (count($GLOBALS['wiki']->config["yeswiki-farm-sql"])>1) {
+                $extrafields .= '<h5>Type de wiki</h5>'.'<select id="yeswiki-farm-sql" name="yeswiki-farm-sql">';
+                foreach ($GLOBALS['wiki']->config["yeswiki-farm-sql"] as $key => $sql) {
+                    $extrafields .= '<option value="'.$key.'">'.$sql["label"].'</option>'."\n";
+                }
+                $extrafields .= '</select>'."\n";
+            } else {
+                $extrafields .= '<input type="hidden" name="yeswiki-farm-sql" value="0">'."\n";
             }
         }
-        
-        $html .= $tableau_template[2] . $bulledaide . ' : </div>'."\n"
+
+        $html .= $tableau_template[2] . $bulledaide . ' : </label>'."\n"
             .'<div class="controls col-xs-8">'."\n"
             .'<div class="input-prepend input-group">'."\n"
             .'<span class="add-on input-group-addon">'.$GLOBALS['wiki']->config['yeswiki-farm-root-url'].'</span>'."\n"
@@ -99,7 +294,6 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
             .$extrafields.'</div>'."\n".'</div>'."\n";
         $formtemplate->addElement('html', $html);
     } elseif ($mode == 'requete') {
-        //si le doc n'existe pas, on le crée
         if (!empty($valeurs_fiche[$tableau_template[1]])
             && preg_match('/^[0-9a-zA-Z-]*$/', $valeurs_fiche[$tableau_template[1]])) {
             if (isset($valeurs_fiche[$tableau_template[1].'_exists'])
@@ -107,16 +301,21 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                 // si le wiki a déja été créé on zappe
             } else {
                 if ($valeurs_fiche[$tableau_template[1].'_wikiname'] == '{{folder}}') {
-                    $valeurs_fiche[$tableau_template[1].'_wikiname'] = genere_nom_wiki($valeurs_fiche[$tableau_template[1]], 0);
+                    $valeurs_fiche[$tableau_template[1].'_wikiname'] = genere_nom_wiki(
+                        $valeurs_fiche[$tableau_template[1]],
+                        0
+                    );
                     if ($GLOBALS['wiki']->LoadUser($valeurs_fiche[$tableau_template[1].'_wikiname'])) {
-                        die('L\'utilisateur '.$valeurs_fiche[$tableau_template[1].'_wikiname'].' existe déjà, veuillez trouver un autre nom pour votre wiki.');
+                        die('L\'utilisateur '.$valeurs_fiche[$tableau_template[1].'_wikiname']
+                            .' existe déjà, veuillez trouver un autre nom pour votre wiki.');
                     }
                 }
 
                 // creation d'un user?
                 if ($GLOBALS['wiki']->config['yeswiki-farm-create-user']) {
                     if ($GLOBALS['wiki']->LoadUser($valeurs_fiche[$tableau_template[1].'_wikiname'])) {
-                        die('L\'utilisateur '.$valeurs_fiche[$tableau_template[1].'_wikiname'].' existe déjà, veuillez trouver un autre nom pour votre wiki.');
+                        die('L\'utilisateur '.$valeurs_fiche[$tableau_template[1].'_wikiname']
+                            .' existe déjà, veuillez trouver un autre nom pour votre wiki.');
                     }
                     $GLOBALS['wiki']->Query(
                         "insert into ".$GLOBALS['wiki']->config["table_prefix"]."users set ".
@@ -284,7 +483,13 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                             $GLOBALS['wiki']->config['yeswiki-farm-comments-acls'] = $valeurs_fiche[$tableau_template[1]
                                                                                     .'_wikiname'];
                         }
-                                           
+
+                        $theme = $GLOBALS['wiki']->config['yeswiki-farm-theme'][$_POST['yeswiki-farm-theme']];
+                        $GLOBALS['wiki']->config['yeswiki-farm-fav-theme'] = $theme['theme'];
+                        $GLOBALS['wiki']->config['yeswiki-farm-fav-style'] = $theme['style'];
+                        $GLOBALS['wiki']->config['yeswiki-farm-fav-squelette'] = $theme['squelette'];
+                        $GLOBALS['wiki']->config['yeswiki-farm-bg-img'] = isset($theme['bg-img']) ? $theme['bg-img'] : '';
+
                         // ecriture du fichier de configuration
                         $config = array (
                               'wakka_version' => $GLOBALS['wiki']->config['wakka_version'],
@@ -324,7 +529,7 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                               'favorite_background_image' => $GLOBALS['wiki']->config['yeswiki-farm-bg-img'],
                               'source_url' =>  $GLOBALS['wiki']->href('', $valeurs_fiche['id_fiche']),
                         );
-                        
+
                         if (isset($valeurs_fiche['bf_description'])) {
                             $config['meta_description'] = addslashes(
                                 substr(
@@ -337,7 +542,7 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 
                         // convert config array into PHP code
                         $configCode = "<?php\n// wakka.config.php "._t('CREATED')." ".strftime("%c")."\n// ".
-                                        _t('DONT_CHANGE_YESWIKI_VERSION_MANUALLY')." !\n\n\$wakkaConfig = ";
+                                        _t('DONT_CHANGE_YESWIKI_VERSION_MANUALLY')." !\n\n\$GLOBALS['wiki']->config = ";
                         $configCode .= var_export($config, true) . ";\n?>";
 
                         if ($fp = @fopen($destfolder.'wakka.config.php', "w")) {
@@ -347,9 +552,9 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                         } else {
                             die('Ecriture du fichier de configuration impossible');
                         }
-
                         // base de données
-                        if ($sql = file_get_contents('tools/ferme/sql/'.$GLOBALS['wiki']->config['yeswiki-farm-sql'])) {
+                        $sqlfile = $GLOBALS['wiki']->config['yeswiki-farm-sql'][$_POST['yeswiki-farm-sql']]['file'];
+                        if ($sql = file_get_contents('tools/ferme/sql/'.$sqlfile)) {
                             $sql = str_replace(
                                 '{{prefix}}',
                                 str_replace('-', '_', $valeurs_fiche[$tableau_template[1]]),
@@ -371,13 +576,13 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                         } else {
                             die('Lecture du fichier sql impossible');
                         }
-                        
+
                         //die('finish!!');
                     } else {
                         die('Le dossier '.$GLOBALS['wiki']->config['yeswiki-farm-root-folder']
                             .' n\'est pas accessible en écriture');
                     }
-                    
+
                 }
             }
             return array(
@@ -398,7 +603,7 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
             $html .= '<a class="btn btn-primary" href="'.$url.'" target="_blank">'."\n".$url."\n"
                 .'</a>'. "\n";
         }
-        
+
         return $html;
     }
 }
