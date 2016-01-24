@@ -15,5 +15,5 @@ $wakkaConfig['service_account_name'] = isset($wakkaConfig['service_account_name'
 7. créer un dossier sur son google drive, et le partager en écriture avec le mail du compte service créé auparavant
 8. récupérer l'id du dossier partagé en cliquant dessus et en prenant la derniere partie de la barre d'adresse et renseigner tools/googledrive/wiki.php ou dans wakka.config.php :
 $wakkaConfig['folder_id'] = isset($wakkaConfig['folder_id']) ? $wakkaConfig['folder_id'] : "XXXXXXX";
-9. utiliser la ligne suivante pour le formulaire bazar:
+9. utiliser la ligne suivante pour le formulaire bazar:  
 `collaborative_doc***bf_type_doc***Type de document*** *** *** *** *** ***0***0***`
