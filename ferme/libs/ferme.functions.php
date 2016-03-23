@@ -164,7 +164,7 @@ function copyRecursive($path, $dest)
         $objects = scandir($path);
         if (sizeof($objects) > 0) {
             foreach ($objects as $file) {
-                if ($file == "." || $file == ".." || $file == ".git") {
+                if ($file == "." || $file == ".." || $file == ".git" || $file == "bower_components") {
                     continue;
                 }
                 // go on
@@ -249,6 +249,8 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                     .'name="'.$tableau_template[1].'_password'.'" value="'
                     .htmlspecialchars($GLOBALS['wiki']->config['yeswiki-farm-password-WikiAdmin']).'">';
             }
+
+            // theme utilise
             if (count($GLOBALS['wiki']->config["yeswiki-farm-themes"])>1) {
                 $themepreview = '<div id="yeswiki-farm-theme-imgs" style="width:400px;margin: 10px 0 20px;">';
                 $extrafields .= '<h5>Thème graphique</h5>'.'<select id="yeswiki-farm-theme" class="form-control" name="yeswiki-farm-theme">';
@@ -273,7 +275,7 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                 $extrafields .= '<input type="hidden" name="yeswiki-farm-theme" value="0">'."\n";
             }
 
-
+            // modele de wiki utilisé
             if (count($GLOBALS['wiki']->config["yeswiki-farm-sql"])>1) {
                 $extrafields .= '<h5>Type de wiki</h5>'.'<select id="yeswiki-farm-sql" class="form-control" name="yeswiki-farm-sql">';
                 foreach ($GLOBALS['wiki']->config["yeswiki-farm-sql"] as $key => $sql) {
@@ -316,7 +318,7 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                 foreach ($GLOBALS['wiki']->config["yeswiki-farm-options"] as $key => $option) {
                     $extrafields .= '<div class="checkbox">'."\n"
                       .'<label>'."\n"
-                      .'<input type="checkbox"'.($option['checked'] ? ' checked' : '').' name="yeswiki-farm-options" value="'.$key.'">'
+                      .'<input type="checkbox"'.($option['checked'] ? ' checked' : '').' name="yeswiki-farm-options['.$key.']" value="'.$key.'">'
                       .$option['label']."\n"
                       .'</label>'."\n"
                       .'</div>'."\n";
@@ -333,13 +335,13 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
             .$extrafields.'</div>'."\n".'</div>'."\n";
         $formtemplate->addElement('html', $html);
     } elseif ($mode == 'requete') {
+        var_dump($valeurs_fiche);
         if (!empty($valeurs_fiche[$tableau_template[1]])
             && preg_match('/^[0-9a-zA-Z-]*$/', $valeurs_fiche[$tableau_template[1]])) {
             if (isset($valeurs_fiche[$tableau_template[1].'_exists'])
                 && $valeurs_fiche[$tableau_template[1].'_exists'] == 1) {
                 // si le wiki a déja été créé on zappe
             } else {
-                //var_dump($valeurs_fiche);die;break;
                 if ($valeurs_fiche[$tableau_template[1].'_wikiname'] == '{{folder}}') {
                     $valeurs_fiche[$tableau_template[1].'_wikiname'] = genere_nom_wiki(
                         $valeurs_fiche[$tableau_template[1]],
@@ -399,11 +401,7 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 
                         // themes
                         mkdir($destfolder.'themes');
-                        // theme bootstrap par defaut
-                        copyRecursive(
-                            $srcfolder.'themes'.DIRECTORY_SEPARATOR.'bootstrap',
-                            $destfolder.'themes'.DIRECTORY_SEPARATOR.'bootstrap'
-                        );
+
                         // templates
                         copyRecursive(
                             $srcfolder.'themes'.DIRECTORY_SEPARATOR.'tools',
@@ -511,20 +509,31 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                         }
 
                         // droits d'accès par aux pages
-                        if ($GLOBALS['wiki']->config['yeswiki-farm-write-acls'] == 'user') {
-                            $GLOBALS['wiki']->config['yeswiki-farm-write-acls'] = $valeurs_fiche[$tableau_template[1]
-                                                                                    .'_wikiname'];
+                        $rights = $GLOBALS['wiki']->config['yeswiki-farm-acls'][$valeurs_fiche['yeswiki-farm-acls']];
+                        if ($rights["write"] == '{{user}}') {
+                            if (!empty($valeurs_fiche["access-username"])) {
+                                $rights["write"] = $valeurs_fiche["access-username"];
+                            } else {
+                                $rights["write"] = $valeurs_fiche[$tableau_template[1].'_wikiname'];
+                            }
                         }
-                        if ($GLOBALS['wiki']->config['yeswiki-farm-read-acls'] == 'user') {
-                            $GLOBALS['wiki']->config['yeswiki-farm-read-acls'] = $valeurs_fiche[$tableau_template[1]
-                                                                                    .'_wikiname'];
+                        if ($rights["read"] == '{{user}}') {
+                            if (!empty($valeurs_fiche["access-username"])) {
+                                $rights["read"] = $valeurs_fiche["access-username"];
+                            } else {
+                                $rights["read"] = $valeurs_fiche[$tableau_template[1].'_wikiname'];
+                            }
                         }
-                        if ($GLOBALS['wiki']->config['yeswiki-farm-comments-acls'] == 'user') {
-                            $GLOBALS['wiki']->config['yeswiki-farm-comments-acls'] = $valeurs_fiche[$tableau_template[1]
-                                                                                    .'_wikiname'];
+                        if ($rights["comments"] == '{{user}}') {
+                            if (!empty($valeurs_fiche["access-username"])) {
+                                $rights["comments"] = $valeurs_fiche["access-username"];
+                            } else {
+                                $rights["comments"] = $valeurs_fiche[$tableau_template[1].'_wikiname'];
+                            }
                         }
 
-                        $theme = $GLOBALS['wiki']->config['yeswiki-farm-theme'][$_POST['yeswiki-farm-theme']];
+                        // theme choisi
+                        $theme = $GLOBALS['wiki']->config['yeswiki-farm-themes'][$_POST['yeswiki-farm-theme']];
                         $GLOBALS['wiki']->config['yeswiki-farm-fav-theme'] = $theme['theme'];
                         $GLOBALS['wiki']->config['yeswiki-farm-fav-style'] = $theme['style'];
                         $GLOBALS['wiki']->config['yeswiki-farm-fav-squelette'] = $theme['squelette'];
@@ -557,9 +566,9 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                               'navigation_links' => $GLOBALS['wiki']->config['navigation_links'],
                               'referrers_purge_time' => $GLOBALS['wiki']->config['referrers_purge_time'],
                               'pages_purge_time' => $GLOBALS['wiki']->config['pages_purge_time'],
-                              'default_write_acl' => $GLOBALS['wiki']->config['yeswiki-farm-write-acls'],
-                              'default_read_acl' => $GLOBALS['wiki']->config['yeswiki-farm-read-acls'],
-                              'default_comment_acl' => $GLOBALS['wiki']->config['yeswiki-farm-comments-acls'],
+                              'default_write_acl' => $rights["write"],
+                              'default_read_acl' => $rights["read"],
+                              'default_comment_acl' => $rights["comments"],
                               'preview_before_save' => $GLOBALS['wiki']->config['preview_before_save'],
                               'allow_raw_html' => $GLOBALS['wiki']->config['allow_raw_html'],
                               'default_language' => $GLOBALS['wiki']->config['default_language'],
@@ -582,7 +591,7 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
 
                         // convert config array into PHP code
                         $configCode = "<?php\n// wakka.config.php "._t('CREATED')." ".strftime("%c")."\n// ".
-                                        _t('DONT_CHANGE_YESWIKI_VERSION_MANUALLY')." !\n\n\$GLOBALS['wiki']->config = ";
+                                        _t('DONT_CHANGE_YESWIKI_VERSION_MANUALLY')." !\n\n\$wakkaConfig = ";
                         $configCode .= var_export($config, true) . ";\n?>";
 
                         if ($fp = @fopen($destfolder.'wakka.config.php', "w")) {
@@ -594,10 +603,11 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                         }
                         // base de données
                         $sqlfile = $GLOBALS['wiki']->config['yeswiki-farm-sql'][$_POST['yeswiki-farm-sql']]['file'];
+                        $prefix = str_replace('-', '_', $valeurs_fiche[$tableau_template[1]]);
                         if ($sql = file_get_contents('tools/ferme/sql/'.$sqlfile)) {
                             $sql = str_replace(
                                 '{{prefix}}',
-                                str_replace('-', '_', $valeurs_fiche[$tableau_template[1]]),
+                                $prefix,
                                 $sql
                             );
                             $sql = str_replace('{{WikiName}}', $valeurs_fiche[$tableau_template[1].'_wikiname'], $sql);
@@ -613,16 +623,27 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                             );
                             /* Execute queries */
                             mysqli_multi_query($link, utf8_decode($sql));
+                            do {
+                                ;
+                            } while (mysqli_next_result($link));
                         } else {
                             die('Lecture du fichier sql impossible');
                         }
 
-                        //die('finish!!');
+                        if (!empty($valeurs_fiche["access-username"])) {
+                            $GLOBALS["wiki"]->Query("INSERT INTO `yeswiki_".$prefix."__users` (`name`, `password`, `email`, `motto`, `revisioncount`, `changescount`, `doubleclickedit`, `signuptime`, `show_comments`) VALUES ('".$valeurs_fiche["access-username"]."', md5('".$valeurs_fiche["access-password"]."'), '".$valeurs_fiche[$tableau_template[1].'_email']."', '', '20', '50', 1, now(), 2);");
+                        }
+
+                        if (!empty($valeurs_fiche["yeswiki-farm-options"])) {
+                            $taboptions = explode(',', $valeurs_fiche["yeswiki-farm-options"]);
+                            foreach ($taboptions as $option) {
+                                $GLOBALS["wiki"]->Query('UPDATE `yeswiki_'.$prefix.'__pages` SET body=CONCAT(body, "'.$GLOBALS['wiki']->config['yeswiki-farm-options'][$option]['content'].'") WHERE tag="'.$GLOBALS['wiki']->config['yeswiki-farm-options'][$option]['page'].'" AND latest="Y";');
+                            }
+                        }
                     } else {
                         die('Le dossier '.$GLOBALS['wiki']->config['yeswiki-farm-root-folder']
                             .' n\'est pas accessible en écriture');
                     }
-
                 }
             }
             return array(
@@ -638,10 +659,9 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
             $url = $GLOBALS['wiki']->config['yeswiki-farm-root-url'].$valeurs_fiche[$tableau_template[1]];
             $html .= '<div class="BAZ_rubrique" data-id="' . $tableau_template[1] . '">' . "\n"
                 .'<span class="BAZ_label">Accèder à l\'espace projet :</span>' . "\n"
-                .'<span class="BAZ_texte">'.$valeurs_fiche[$tableau_template[1]].'</span>' . "\n"
+                .'<span class="BAZ_texte"><a class="btn btn-primary" href="'.$url.'" target="_blank">'."\n".$url."\n"
+                    .'</a></span>' . "\n"
                 .'</div> <!-- /.BAZ_rubrique -->' . "\n";
-            $html .= '<a class="btn btn-primary" href="'.$url.'" target="_blank">'."\n".$url."\n"
-                .'</a>'. "\n";
         }
 
         return $html;

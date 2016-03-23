@@ -1,20 +1,20 @@
 DROP TABLE IF EXISTS `yeswiki_{{prefix}}__acls`;
 CREATE TABLE `yeswiki_{{prefix}}__acls` (
-  `page_tag` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `privilege` varchar(20) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `list` text COLLATE utf8_unicode_ci NOT NULL,
+  `page_tag` varchar(50) NOT NULL DEFAULT '',
+  `privilege` varchar(20) NOT NULL DEFAULT '',
+  `list` text NOT NULL,
   PRIMARY KEY (`page_tag`,`privilege`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 
 DROP TABLE IF EXISTS `yeswiki_{{prefix}}__links`;
 CREATE TABLE `yeswiki_{{prefix}}__links` (
-  `from_tag` char(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `to_tag` char(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `from_tag` char(50) NOT NULL DEFAULT '',
+  `to_tag` char(50) NOT NULL DEFAULT '',
   UNIQUE KEY `from_tag` (`from_tag`,`to_tag`),
   KEY `idx_from` (`from_tag`),
   KEY `idx_to` (`to_tag`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 INSERT INTO `yeswiki_{{prefix}}__links` (`from_tag`, `to_tag`) VALUES
 ('AidE',  'CoursUtilisationYesWiki'),
@@ -149,22 +149,22 @@ INSERT INTO `yeswiki_{{prefix}}__nature` (`bn_id_nature`, `bn_label_nature`, `bn
 DROP TABLE IF EXISTS `yeswiki_{{prefix}}__pages`;
 CREATE TABLE `yeswiki_{{prefix}}__pages` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `tag` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `tag` varchar(50) NOT NULL DEFAULT '',
   `time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `body` text COLLATE utf8_unicode_ci NOT NULL,
-  `body_r` text COLLATE utf8_unicode_ci NOT NULL,
-  `owner` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `user` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `latest` enum('Y','N') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N',
-  `handler` varchar(30) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'page',
-  `comment_on` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `body` text NOT NULL,
+  `body_r` text NOT NULL,
+  `owner` varchar(50) NOT NULL DEFAULT '',
+  `user` varchar(50) NOT NULL DEFAULT '',
+  `latest` enum('Y','N') NOT NULL DEFAULT 'N',
+  `handler` varchar(30) NOT NULL DEFAULT 'page',
+  `comment_on` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `idx_tag` (`tag`),
   KEY `idx_time` (`time`),
   KEY `idx_latest` (`latest`),
   KEY `idx_comment_on` (`comment_on`),
   FULLTEXT KEY `tag` (`tag`,`body`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 INSERT INTO `yeswiki_{{prefix}}__pages` (`id`, `tag`, `time`, `body`, `body_r`, `owner`, `user`, `latest`, `handler`, `comment_on`) VALUES
 (1, 'BacASable',  '2015-07-08 10:08:31',  ' - si vous cliquez sur \"Ã©diter cette page\"\n - vous pourrez Ã©crire dans cette page comme bon vous semble\n - puis en cliquant sur \"sauver\" vous pourrez enregistrer vos modifications',  '', '{{WikiName}}',  '{{WikiName}}',  'Y',  'page', ''),
@@ -189,43 +189,43 @@ INSERT INTO `yeswiki_{{prefix}}__pages` (`id`, `tag`, `time`, `body`, `body_r`, 
 
 DROP TABLE IF EXISTS `yeswiki_{{prefix}}__referrers`;
 CREATE TABLE `yeswiki_{{prefix}}__referrers` (
-  `page_tag` char(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `referrer` char(150) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+  `page_tag` char(50) NOT NULL DEFAULT '',
+  `referrer` char(150) NOT NULL DEFAULT '',
   `time` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   KEY `idx_page_tag` (`page_tag`),
   KEY `idx_time` (`time`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 
 DROP TABLE IF EXISTS `yeswiki_{{prefix}}__triples`;
 CREATE TABLE `yeswiki_{{prefix}}__triples` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `resource` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `property` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `value` text COLLATE utf8_unicode_ci NOT NULL,
+  `resource` varchar(255) NOT NULL DEFAULT '',
+  `property` varchar(255) NOT NULL DEFAULT '',
+  `value` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `resource` (`resource`),
   KEY `property` (`property`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 INSERT INTO `yeswiki_{{prefix}}__triples` (`id`, `resource`, `property`, `value`) VALUES
 (1, 'ThisWikiGroup:admins', 'http://www.wikini.net/_vocabulary/acls', '{{WikiName}}');
 
 DROP TABLE IF EXISTS `yeswiki_{{prefix}}__users`;
 CREATE TABLE `yeswiki_{{prefix}}__users` (
-  `name` varchar(80) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `password` varchar(32) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `email` varchar(50) COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-  `motto` text COLLATE utf8_unicode_ci NOT NULL,
+  `name` varchar(80) NOT NULL DEFAULT '',
+  `password` varchar(32) NOT NULL DEFAULT '',
+  `email` varchar(50) NOT NULL DEFAULT '',
+  `motto` text NOT NULL,
   `revisioncount` int(10) unsigned NOT NULL DEFAULT '20',
   `changescount` int(10) unsigned NOT NULL DEFAULT '50',
-  `doubleclickedit` enum('Y','N') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'Y',
+  `doubleclickedit` enum('Y','N') NOT NULL DEFAULT 'Y',
   `signuptime` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `show_comments` enum('Y','N') COLLATE utf8_unicode_ci NOT NULL DEFAULT 'N',
+  `show_comments` enum('Y','N') NOT NULL DEFAULT 'N',
   PRIMARY KEY (`name`),
   KEY `idx_name` (`name`),
   KEY `idx_signuptime` (`signuptime`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 INSERT INTO `yeswiki_{{prefix}}__users` (`name`, `password`, `email`, `motto`, `revisioncount`, `changescount`, `doubleclickedit`, `signuptime`, `show_comments`) VALUES
 ('{{WikiName}}', md5('{{password}}'), '{{email}}', '', 20, 50, 'Y',  '2015-07-08 10:08:31',  'N');
