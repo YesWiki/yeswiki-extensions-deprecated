@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<plugin name="wkmarkdown" version="0.1" active="0">
+  <author>Florian Schmitt</author>
+  <label>Markdown syntax</label>
+  <desc>syntaxe markdown pour yeswiki</desc>
+</plugin>
