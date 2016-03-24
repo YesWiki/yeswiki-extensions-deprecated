@@ -102,13 +102,13 @@ OPTION: pour affiner le fonctionnement, ajouter les informations suivantes à wa
       'label'    => 'Je souhaite intégrer un pad dans mon wiki', //Description de l'ajout
       'checked'  => false, // coche par defaut ?
       'page'    => 'PageMenuHaut', // Page
-      'content' => "\n - [[EtherPad Pad]]" // Contenu en syntaxe wiki de l'ajout
+      'content' => " - [[EtherPad Pad]]\n" // Contenu en syntaxe wiki de l'ajout
     ),
     array(
       'label'    => 'Je souhaite recevoir les informations sur mon wiki des autres projets', //Description de l'ajout
       'checked'  => true, // coche par defaut ?
       'page'    => 'PageMenuHaut', // Page
-      'content' => "\n - [[InfosMutualisees Infos mutualisées]]" // Contenu en syntaxe wiki de l'ajout
+      'content' => " - [[InfosMutualisees Infos mutualisées]]\n" // Contenu en syntaxe wiki de l'ajout
     )
   ),
 
