@@ -155,6 +155,28 @@ function initFarmConfig()
     if (!isset($GLOBALS['wiki']->config['yeswiki-farm-homepage'])) {
         $GLOBALS['wiki']->config['yeswiki-farm-homepage'] = $GLOBALS['wiki']->config['root_page'];
     }
+
+    // prefixe par default
+    if (!isset($GLOBALS['wiki']->config['yeswiki-farm-prefix'])) {
+        $GLOBALS['wiki']->config['yeswiki-farm-prefix'] = 'yeswiki_';
+    }
+}
+
+function rrmdir($src)
+{
+    $dir = opendir($src);
+    while (false !== ( $file = readdir($dir))) {
+        if (( $file != '.' ) && ( $file != '..' )) {
+            $full = $src . '/' . $file;
+            if (is_dir($full)) {
+                rrmdir($full);
+            } else {
+                unlink($full);
+            }
+        }
+    }
+    closedir($dir);
+    rmdir($src);
 }
 
 function copyRecursive($path, $dest)
@@ -331,11 +353,10 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
             .'<div class="input-prepend input-group">'."\n"
             .'<span class="add-on input-group-addon">'.$GLOBALS['wiki']->config['yeswiki-farm-root-url'].'</span>'."\n"
             .'<input type="text" class="form-control" id="'. $tableau_template[1] . '" name="' . $tableau_template[1]
-            .'" required'.$disable.' value="'.$def.'" pattern="^[0-9a-zA-Z-]*$" placeholder="dossier">'.'</div>'."\n"
+            .'" required'.$disable.' value="'.$def.'" pattern="^[0-9a-zA-Z-]*$" placeholder="nom du site (sans espace, ni caractères spéciaux)">'.'</div>'."\n"
             .$extrafields.'</div>'."\n".'</div>'."\n";
         $formtemplate->addElement('html', $html);
     } elseif ($mode == 'requete') {
-        var_dump($valeurs_fiche);
         if (!empty($valeurs_fiche[$tableau_template[1]])
             && preg_match('/^[0-9a-zA-Z-]*$/', $valeurs_fiche[$tableau_template[1]])) {
             if (isset($valeurs_fiche[$tableau_template[1].'_exists'])
@@ -539,6 +560,9 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                         $GLOBALS['wiki']->config['yeswiki-farm-fav-squelette'] = $theme['squelette'];
                         $GLOBALS['wiki']->config['yeswiki-farm-bg-img'] = isset($theme['bg-img']) ? $theme['bg-img'] : '';
 
+                        // generation du prefixe
+                        $prefix = $GLOBALS['wiki']->config['yeswiki-farm-prefix'].str_replace('-', '_', $valeurs_fiche[$tableau_template[1]]);
+
                         // ecriture du fichier de configuration
                         $config = array (
                               'wakka_version' => $GLOBALS['wiki']->config['wakka_version'],
@@ -550,8 +574,7 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                               'mysql_database' => $GLOBALS['wiki']->config['mysql_database'],
                               'mysql_user' => $GLOBALS['wiki']->config['mysql_user'],
                               'mysql_password' => $GLOBALS['wiki']->config['mysql_password'],
-                              'table_prefix' => 'yeswiki_'
-                                                .str_replace('-', '_', $valeurs_fiche[$tableau_template[1]]).'__',
+                              'table_prefix' => $prefix.'__',
                               'root_page' => $GLOBALS['wiki']->config['yeswiki-farm-homepage'],
                               'wakka_name' => addslashes($valeurs_fiche['bf_titre']),
                               'base_url' => $GLOBALS['wiki']->config['yeswiki-farm-root-url']
@@ -601,9 +624,34 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                         } else {
                             die('Ecriture du fichier de configuration impossible');
                         }
-                        // base de données
+                        // creation des tables de la base de données
+                        /* create sql connection*/
+                        $link = mysqli_connect(
+                            $GLOBALS["wiki"]->config['mysql_host'],
+                            $GLOBALS["wiki"]->config['mysql_user'],
+                            $GLOBALS["wiki"]->config['mysql_password'],
+                            $GLOBALS["wiki"]->config['mysql_database']
+                        );
+                        if ($sql = file_get_contents('tools/ferme/sql/create-tables.sql')) {
+                            $sql = str_replace(
+                                '{{prefix}}',
+                                $prefix,
+                                $sql
+                            );
+                            $sql = str_replace('{{WikiName}}', $valeurs_fiche[$tableau_template[1].'_wikiname'], $sql);
+                            $sql = str_replace('{{password}}', $valeurs_fiche[$tableau_template[1].'_password'], $sql);
+                            $sql = str_replace('{{email}}', $valeurs_fiche[$tableau_template[1].'_email'], $sql);
+
+                            /* Execute queries */
+                            mysqli_multi_query($link, utf8_decode($sql));
+                            do {
+                                ;
+                            } while (mysqli_next_result($link));
+                        } else {
+                            die('Lecture du fichier sql "tools/ferme/sql/create-tables.sql" impossible');
+                        }
+                        // insertion des donnees du modele dans la base de donnees
                         $sqlfile = $GLOBALS['wiki']->config['yeswiki-farm-sql'][$_POST['yeswiki-farm-sql']]['file'];
-                        $prefix = str_replace('-', '_', $valeurs_fiche[$tableau_template[1]]);
                         if ($sql = file_get_contents('tools/ferme/sql/'.$sqlfile)) {
                             $sql = str_replace(
                                 '{{prefix}}',
@@ -614,30 +662,23 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                             $sql = str_replace('{{password}}', $valeurs_fiche[$tableau_template[1].'_password'], $sql);
                             $sql = str_replace('{{email}}', $valeurs_fiche[$tableau_template[1].'_email'], $sql);
 
-                             /* create sql connection*/
-                            $link = mysqli_connect(
-                                $GLOBALS["wiki"]->config['mysql_host'],
-                                $GLOBALS["wiki"]->config['mysql_user'],
-                                $GLOBALS["wiki"]->config['mysql_password'],
-                                $GLOBALS["wiki"]->config['mysql_database']
-                            );
                             /* Execute queries */
                             mysqli_multi_query($link, utf8_decode($sql));
                             do {
                                 ;
                             } while (mysqli_next_result($link));
                         } else {
-                            die('Lecture du fichier sql impossible');
+                            die('Lecture du fichier sql "tools/ferme/sql/'.$sqlfile.'" impossible');
                         }
 
                         if (!empty($valeurs_fiche["access-username"])) {
-                            $GLOBALS["wiki"]->Query("INSERT INTO `yeswiki_".$prefix."__users` (`name`, `password`, `email`, `motto`, `revisioncount`, `changescount`, `doubleclickedit`, `signuptime`, `show_comments`) VALUES ('".$valeurs_fiche["access-username"]."', md5('".$valeurs_fiche["access-password"]."'), '".$valeurs_fiche[$tableau_template[1].'_email']."', '', '20', '50', 1, now(), 2);");
+                            $GLOBALS["wiki"]->Query("INSERT INTO `".$prefix."__users` (`name`, `password`, `email`, `motto`, `revisioncount`, `changescount`, `doubleclickedit`, `signuptime`, `show_comments`) VALUES ('".$valeurs_fiche["access-username"]."', md5('".$valeurs_fiche["access-password"]."'), '".$valeurs_fiche[$tableau_template[1].'_email']."', '', '20', '50', 1, now(), 2);");
                         }
 
                         if (!empty($valeurs_fiche["yeswiki-farm-options"])) {
                             $taboptions = explode(',', $valeurs_fiche["yeswiki-farm-options"]);
                             foreach ($taboptions as $option) {
-                                $GLOBALS["wiki"]->Query('UPDATE `yeswiki_'.$prefix.'__pages` SET body=CONCAT(body, "'.$GLOBALS['wiki']->config['yeswiki-farm-options'][$option]['content'].'") WHERE tag="'.$GLOBALS['wiki']->config['yeswiki-farm-options'][$option]['page'].'" AND latest="Y";');
+                                $GLOBALS["wiki"]->Query('UPDATE `'.$prefix.'__pages` SET body=CONCAT(body, "'.utf8_decode($GLOBALS['wiki']->config['yeswiki-farm-options'][$option]['content']).'") WHERE tag="'.$GLOBALS['wiki']->config['yeswiki-farm-options'][$option]['page'].'" AND latest="Y";');
                             }
                         }
                     } else {
