@@ -160,6 +160,16 @@ function initFarmConfig()
     if (!isset($GLOBALS['wiki']->config['yeswiki-farm-prefix'])) {
         $GLOBALS['wiki']->config['yeswiki-farm-prefix'] = 'yeswiki_';
     }
+
+    // prefixe par default
+    if (isset($GLOBALS['wiki']->config['yeswiki-farm-group']) and is_array($GLOBALS['wiki']->config['yeswiki-farm-group'])) {
+        if (!isset($GLOBALS['wiki']->config['yeswiki-farm-group']['groupname'])
+            or !isset($GLOBALS['wiki']->config['yeswiki-farm-group']['group_members_field'])) {
+            die("['yeswiki-farm-group']['groupname'] et/ou ['yeswiki-farm-group']['group_members_field'] non renseignés.");
+        }
+    } else {
+        $GLOBALS['wiki']->config['yeswiki-farm-group'] = false;
+    }
 }
 
 function rrmdir($src)
@@ -602,6 +612,12 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                               'source_url' =>  $GLOBALS['wiki']->href('', $valeurs_fiche['id_fiche']),
                         );
 
+                        // options supplementaires pour le fichier de conf des wikis crées
+                        if (isset($GLOBALS['wiki']->config['yeswiki-farm-extra-config']) and is_array($GLOBALS['wiki']->config['yeswiki-farm-extra-config'])) {
+                            $config = array_merge($config, $GLOBALS['wiki']->config['yeswiki-farm-extra-config']);
+                        }
+
+                        // prendre la description de la fiche pour generer les metas description
                         if (isset($valeurs_fiche['bf_description'])) {
                             $config['meta_description'] = addslashes(
                                 substr(
@@ -686,6 +702,24 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                             .' n\'est pas accessible en écriture');
                     }
                 }
+            }
+            // creation d'un groupe et ajout des membres
+            if (is_array($GLOBALS['wiki']->config['yeswiki-farm-group'])) {
+                // generation du prefixe
+                $tripletable = $GLOBALS['wiki']->config['yeswiki-farm-prefix'].str_replace('-', '_', $valeurs_fiche[$tableau_template[1]]).'__triples';
+
+                // on efface les anciennes valeurs du groupe
+                $remsql = 'DELETE FROM `'.$tripletable
+                  .'` WHERE `resource`="ThisWikiGroup:'.$GLOBALS['wiki']->config['yeswiki-farm-group']['groupname']
+                       .'" and `property`="http://www.wikini.net/_vocabulary/acls";';
+                $GLOBALS['wiki']->Query($remsql);
+
+                // on ajoute les nouvelles valeurs du groupe
+                $users = $valeurs_fiche[$GLOBALS['wiki']->config['yeswiki-farm-group']['group_members_field']];
+                $addsql = 'INSERT INTO `'.$tripletable.'` (`resource`, `property`, `value`)'
+                  .' VALUES (\'ThisWikiGroup:'.$GLOBALS['wiki']->config['yeswiki-farm-group']['groupname'].'\','
+                  .' \'http://www.wikini.net/_vocabulary/acls\', \''.implode("\n", explode(',', $users)).'\');';
+                $GLOBALS['wiki']->Query($addsql);
             }
             return array(
                 $tableau_template[1] => $valeurs_fiche[$tableau_template[1]]
