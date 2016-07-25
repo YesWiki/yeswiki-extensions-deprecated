@@ -17,55 +17,63 @@ function collaborative_doc(&$formtemplate, $tableau_template, $mode, $valeurs_fi
     );
 
     if ($mode == 'saisie') {
-        $bulledaide = '';
-        if (isset($tableau_template[10]) && $tableau_template[10] != '') {
-            $bulledaide = ' &nbsp;&nbsp;<img class="tooltip_aide" title="' .
-            htmlentities($tableau_template[10], ENT_QUOTES, TEMPLATES_DEFAULT_CHARSET) .
-            '" src="tools/bazar/presentation/images/aide.png" width="16" height="16" alt="image aide" />';
+
+        // test de l'existance d'un fichier, dans ce cas on ne propose pas sa creation
+        $urldoc = '';
+        if (isset($valeurs_fiche[$tableau_template[1].$valeurs_fiche[$tableau_template[1]] . '_url'])) {
+            $urldoc = $valeurs_fiche[$tableau_template[1].$valeurs_fiche[$tableau_template[1]] . '_url'];
         }
+        //var_dump($urldoc, empty($urldoc));
 
-        $select_html = '<div class="control-group form-group">' . "\n" . '<label class="control-label col-xs-3">' . "\n";
-        if (isset($tableau_template[8]) && $tableau_template[8] == 1) {
-            $select_html.= '<span class="symbole_obligatoire">*&nbsp;</span>' . "\n";
-        }
-        $select_html.= $tableau_template[2] . $bulledaide . ' : </label>' . "\n" .
-            '<div class="controls col-xs-8">' . "\n" . '<select';
+        if (empty($urldoc)) {
+          $bulledaide = '';
+          if (isset($tableau_template[10]) && $tableau_template[10] != '') {
+              $bulledaide = ' &nbsp;&nbsp;<img class="tooltip_aide" title="' .
+              htmlentities($tableau_template[10], ENT_QUOTES, TEMPLATES_DEFAULT_CHARSET) .
+              '" src="tools/bazar/presentation/images/aide.png" width="16" height="16" alt="image aide" />';
+          }
 
-        $select_attributes = ' class="form-control" id="'.$tableau_template[1].'" name="'.$tableau_template[1].'"';
+          $select_html = '<div class="control-group form-group">' . "\n" . '<label class="control-label col-xs-3">' . "\n";
+          if (isset($tableau_template[8]) && $tableau_template[8] == 1) {
+              $select_html.= '<span class="symbole_obligatoire">*&nbsp;</span>' . "\n";
+          }
+          $select_html.= $tableau_template[2] . $bulledaide . ' : </label>' . "\n" .
+              '<div class="controls col-xs-8">' . "\n";
+            $select_html.=  '<select';
+            $select_attributes = ' class="form-control" id="'.$tableau_template[1].'" name="'.$tableau_template[1].'"';
 
-        if (isset($tableau_template[8]) && $tableau_template[8] == 1) {
-            $select_attributes.= ' required="required"';
-        }
-        $select_html.= $select_attributes . '>' . "\n";
-
-        if (isset($valeurs_fiche[$tableau_template[1]]) && $valeurs_fiche[$tableau_template[1]] != '') {
-            $def = $valeurs_fiche[$tableau_template[1]];
-        } else {
-            $def = $tableau_template[5];
-        }
-
-        if ($def == '' && ($tableau_template[4] == '' || $tableau_template[4] <= 1) || $def == 0) {
-            $select_html.= '<option value="" selected="selected">Aucun</option>' . "\n";
-        }
-
-        if (is_array($valliste)) {
-            foreach ($valliste as $key => $label) {
-                $select_html.= '<option value="' . $key . '"';
-                if ($def != '' && $key == $def) {
-                    $select_html.= ' selected="selected"';
-                }
-                $select_html.= '>' . $label . '</option>' . "\n";
+            if (isset($tableau_template[8]) && $tableau_template[8] == 1) {
+                $select_attributes.= ' required="required"';
             }
-        }
-        $select_html.= "</select>\n</div>\n</div>\n";
-        if (isset($valeurs_fiche[$tableau_template[1]])
-            && isset($valeurs_fiche[$tableau_template[1].$valeurs_fiche[$tableau_template[1]] . '_url'])
-            && $valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'] != '') {
-            $select_html.= '<input type="hidden" value="'.
-                $valeurs_fiche[$tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'].'" name="'.
-                $tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'.'">'."\n";
-        }
+            $select_html.= $select_attributes . '>' . "\n";
 
+            if (isset($valeurs_fiche[$tableau_template[1]]) && $valeurs_fiche[$tableau_template[1]] != '') {
+                $def = $valeurs_fiche[$tableau_template[1]];
+            } else {
+                $def = $tableau_template[5];
+            }
+
+            if ($def == '' && ($tableau_template[4] == '' || $tableau_template[4] <= 1) || $def == 0) {
+                $select_html.= '<option value="" selected="selected">Aucun</option>' . "\n";
+            }
+
+            if (is_array($valliste)) {
+                foreach ($valliste as $key => $label) {
+                    $select_html.= '<option value="' . $key . '"';
+                    if ($def != '' && $key == $def) {
+                        $select_html.= ' selected="selected"';
+                    }
+                    $select_html.= '>' . $label . '</option>' . "\n";
+                }
+            }
+            $select_html.= "</select>\n</div>\n</div>\n";
+        } else {
+          $select_html = '<div class="control-group form-group">' . "\n" . '<label class="control-label col-sm-3">' . "\n";
+          $select_html .= 'Lien vers le document : </label>' . "\n" .
+              '<div class="controls col-sm-9">' . "\n". '<a href="'.$urldoc.'">'.$urldoc.'</a>';
+            $select_html.= '<input type="hidden" value="'.$urldoc.'" name="'.
+                $tableau_template[1] . $valeurs_fiche[$tableau_template[1]] . '_url'.'">'."\n</div>\n</div>\n";
+        }
         $formtemplate->addElement('html', $select_html);
     } elseif ($mode == 'requete') {
         //si le doc n'existe pas, on le crée
