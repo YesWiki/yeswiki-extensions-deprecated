@@ -657,6 +657,7 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                             $sql = str_replace('{{WikiName}}', $valeurs_fiche[$tableau_template[1].'_wikiname'], $sql);
                             $sql = str_replace('{{password}}', $valeurs_fiche[$tableau_template[1].'_password'], $sql);
                             $sql = str_replace('{{email}}', $valeurs_fiche[$tableau_template[1].'_email'], $sql);
+                            $sql = str_replace('{{foldername}}', $valeurs_fiche[$tableau_template[1]], $sql);
 
                             /* Execute queries */
                             mysqli_multi_query($link, utf8_decode($sql));
@@ -677,6 +678,8 @@ function yeswiki(&$formtemplate, $tableau_template, $mode, $valeurs_fiche)
                             $sql = str_replace('{{WikiName}}', $valeurs_fiche[$tableau_template[1].'_wikiname'], $sql);
                             $sql = str_replace('{{password}}', $valeurs_fiche[$tableau_template[1].'_password'], $sql);
                             $sql = str_replace('{{email}}', $valeurs_fiche[$tableau_template[1].'_email'], $sql);
+                            $sql = str_replace('{{foldername}}', $valeurs_fiche[$tableau_template[1]], $sql);
+                            
 
                             /* Execute queries */
                             mysqli_multi_query($link, utf8_decode($sql));
